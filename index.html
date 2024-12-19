@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+    <title>WHS Math Team TryoutTaker</title>
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="https://cdn.glitch.global/61fa55ef-d683-42bd-982a-bf555c6689cc/whsmt_logo.png?v=1726583094176"
+    />
+  </head>
+  <body>
+    <!-- Login Page -->
+    <div id="login-page">
+      <h1>WHS Math Team TryoutTaker</h1>
+      <img
+        src="https://cdn.glitch.global/61fa55ef-d683-42bd-982a-bf555c6689cc/whsmt%20logo!.png?v=1726583094176"
+        alt="whsmt logo"
+        class="center"
+        style="transform: translate(0px, -25px)"
+      />
+      <p id="error-message" class="error hidden">
+        Incorrect username or password.
+      </p>
+      <form id="login-form" autocomplete="off">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required /><br /><br />
+        <label for="codename">Codename:</label>
+        <input type="text" id="codename" name="codename" required /><br /><br />
+        <label for="password">Password:</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          required
+        /><br /><br />
+        <button class="button-85" type="submit" role="button">Log In</button>
+      </form>
+    </div>
+
+    <!-- Landing Page -->
+    <div id="landing-page" class="hidden">
+      <h2>Welcome to the Test</h2>
+      <b>Read the following instructions carefully.</b>
+      <p>
+        To decide our teams (10 regulars, 10 alternates) for our regional
+        competitions (MML), we hold tryouts with questions like what you’ll see
+        on MML. It’s also a chance for the captains to troll mathletes with
+        cancerous problems, so have fun! MML is split into six rounds, each
+        testing different topics. Every month, the topics change. Here are
+        October’s rounds:
+      </p>
+      <br />
+      <ol>
+        <li>Geometry: Volumes and Surfaces</li>
+        <li>Plane Geometry: Pythagorean relations in rectilinear figures</li>
+        <li>Algebra 1: Linear Equations</li>
+        <li>Algebra 1: Fractions and Mixed Numbers</li>
+        <li>Algebra 2: Inequalities and Absolute Value</li>
+        <li>Algebra 1: Evaluations</li>
+      </ol>
+      <br />
+      <p>
+        In MML, each round is 10 minutes long and has 3 questions. In this
+        tryout, we’ll be using the same six rounds, 8 minutes each, but with 5
+        questions per round to push everyone to their potential!
+      </p>
+      <br />
+      <p>
+        All rounds are non-calculator, just like MML. Obviously, please do not
+        cheat: including, but not limited to talking, using your phone, being
+        loud, and looking at other’s tests. Your first offense will result in a
+        zero for the round and a second offense will result in a zero for the
+        entire tryout.
+      </p>
+      <br />
+      <p>
+        This is supposed to be hard, so don’t feel bad if you don’t get the
+        results you want! We hold tryouts every month, and I have seen several
+        mathletes work their way up from the alternates to the regular team! As
+        someone who has spend over a decade in competitive mathematics and has
+        failed many times, believe me when I say hard work always pays off.
+      </p>
+      <br />
+      <p>
+        And rest assured, by taking this tryout, you’re already way cooler than
+        those stinky Model UN kids.
+      </p>
+      <div class="button-container">
+        <button class="button-85" id="start-btn">Start</button>
+      </div>
+    </div>
+
+    <!-- Test Page -->
+    <div id="test-page" class="hidden">
+      <h2>Test Round <span id="round-number">1</span></h2>
+      <p id="timer">08:00</p>
+      <div
+        style="
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 50px;
+        "
+      >
+        <div>
+          <img
+            id="question-image"
+            src=""
+            alt="Question Image"
+            style="width: 50vw; height: auto"
+          />
+        </div>
+        <div>
+          <form id="test-form">
+            <div id="question-container"></div>
+            <button class="button-85" type="submit" role="button">
+              Submit Round
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("contextmenu", function (e) {
+        e.preventDefault();
+      });
+
+      document.onkeydown = (e) => {
+        const blockedKeys = [
+          { ctrlKey: true, shiftKey: true, key: "I" },
+          { ctrlKey: true, shiftKey: true, key: "C" },
+          { ctrlKey: true, shiftKey: true, key: "J" },
+          { ctrlKey: true, key: "U" },
+          { key: "F12" },
+        ];
+        if (
+          blockedKeys.some((combo) =>
+            Object.keys(combo).every((k) => e[k] === combo[k])
+          )
+        ) {
+          e.preventDefault();
+        }
+      };
+
+      // Global variables
+      let username = "";
+      let codename = "";
+      let allAnswers = [];
+      let roundNumber = 0;
+      let timer;
+      let isTimerSubmitting = false; // Flag to indicate timer-triggered form submission
+      let loginInProgress = false; // Flag to indicate login form submission
+      let secondsLeft = 480; // Default to 60 seconds for testing
+
+      const validUsers = {
+        TEST: "accept",
+      };
+      const questionImages = [
+        "https://cdn.glitch.global/61fa55ef-d683-42bd-982a-bf555c6689cc/round1.png?v=1727576663791",
+        "https://cdn.glitch.global/61fa55ef-d683-42bd-982a-bf555c6689cc/round2.png?v=1727671826357",
+        "https://cdn.glitch.global/61fa55ef-d683-42bd-982a-bf555c6689cc/round3.png?v=1727709321856",
+        "https://cdn.glitch.global/61fa55ef-d683-42bd-982a-bf555c6689cc/round4.png?v=1727709413435",
+        "https://cdn.glitch.global/61fa55ef-d683-42bd-982a-bf555c6689cc/round5.png?v=1727709472510",
+        "https://cdn.glitch.global/61fa55ef-d683-42bd-982a-bf555c6689cc/round6.png?v=1727709525391",
+      ];
+
+      // Login form submission
+      document
+        .getElementById("login-form")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+          loginInProgress = true; // Set flag when logging in
+
+          const enteredUsername = document
+            .getElementById("username")
+            .value.toUpperCase();
+          const enteredCodename = document.getElementById("codename").value;
+          const enteredPassword = document.getElementById("password").value;
+
+          if (
+            validUsers[enteredUsername] &&
+            validUsers[enteredUsername] === enteredPassword
+          ) {
+            username = enteredUsername;
+            codename = enteredCodename;
+            localStorage.setItem("loggedInUser", username); // Store username in local storage
+            document.getElementById("login-page").classList.add("hidden");
+            document.getElementById("landing-page").classList.remove("hidden");
+          } else {
+            document.getElementById("error-message").classList.remove("hidden");
+          }
+
+          loginInProgress = false; // Reset flag after login process
+        });
+
+      // Start button
+      document
+        .getElementById("start-btn")
+        .addEventListener("click", function () {
+          document.getElementById("landing-page").classList.add("hidden");
+          document.getElementById("test-page").classList.remove("hidden");
+          loadRound(0); // Start round 1
+          resetTimer();
+          startTimer();
+        });
+
+      // Timer functionality
+      function startTimer() {
+        timer = setInterval(function () {
+          secondsLeft--;
+          const minutes = Math.floor(secondsLeft / 60);
+          const seconds = secondsLeft % 60;
+          document.getElementById("timer").textContent = `${minutes}:${
+            seconds < 10 ? "0" + seconds : seconds
+          }`;
+
+          if (secondsLeft <= 0) {
+            clearInterval(timer);
+            isTimerSubmitting = true; // Set flag when the timer submits the form
+            document.getElementById("test-form").submit(); // Auto-submit when time runs out
+          }
+        }, 1000);
+      }
+
+      // Reset Timer
+      function resetTimer() {
+        clearInterval(timer);
+        secondsLeft = 480; // Reset to 1 minute for testing
+      }
+
+      // Load questions and image for the current round
+      function loadRound(round) {
+        roundNumber = round;
+        document.getElementById("round-number").textContent = roundNumber + 1;
+
+        // Set the question image for the current round
+        document.getElementById("question-image").src =
+          questionImages[roundNumber];
+
+        // Clear previous answers and add input boxes for the new round
+        const questionContainer = document.getElementById("question-container");
+        questionContainer.innerHTML = ""; // Clear previous round inputs
+        for (let i = 0; i < 5; i++) {
+          const answerElement = document.createElement("div");
+          answerElement.innerHTML = `<label>Answer ${i + 1}:</label><br>
+            <input type="text" name="question${i + 1}" required><br><br>`;
+          questionContainer.appendChild(answerElement);
+        }
+      }
+
+      // Form submission for each round
+      document
+        .getElementById("test-form")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+
+          const answers = [];
+          const inputs = document.querySelectorAll(
+            "#test-form input[type=text]"
+          );
+          inputs.forEach((input) => answers.push(input.value));
+          allAnswers.push(answers);
+
+          clearInterval(timer); // Stop the timer
+
+          if (roundNumber === 5) {
+            sendDataToGoogleSheet(username, codename, allAnswers);
+            alert("Test completed! Press OK to finish.");
+            localStorage.removeItem("loggedInUser");
+            window.location.reload(); // Reload after the final round submission
+          } else {
+            roundNumber++;
+            loadRound(roundNumber); // Load next round
+            resetTimer();
+            startTimer(); // Restart the timer for the new round
+          }
+
+          isTimerSubmitting = false; // Reset the flag after submission
+        });
+
+      // Blur event to detect cheating
+      window.addEventListener("blur", () => {
+        // Check if the blur event is not triggered during login or timer form submission
+        if (!isTimerSubmitting && !loginInProgress) {
+          sendDataToGoogleSheet(username, codename, allAnswers);
+          window.location.reload();
+        }
+      });
+
+      // Send data to Google Sheets or external system
+      function sendDataToGoogleSheet(username, codename, answers) {
+        const timestamp = new Date().toISOString();
+        const data = { timestamp, username, codename, answers };
+        const zapUrl =
+          "https://hook.us2.make.com/xt2jo6u4u3eq19lknauoshge9xn9ks3f"; // Replace with your own URL
+
+        fetch(zapUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        })
+          .then((response) => {
+            if (response.ok) {
+              console.log("Data sent successfully");
+            } else {
+              console.error("Error sending data");
+            }
+          })
+          .catch((error) => {
+            console.error("Fetch error:", error);
+          });
+      }
+    </script>
+  </body>
+</html>
